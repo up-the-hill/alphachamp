@@ -1,4 +1,5 @@
 import chess
+from alphachamp import next_move
 
 # setup
 board = chess.Board()
@@ -41,10 +42,7 @@ def render(board: chess.Board) -> str:
 
 
 # game loop
-while True:
-    if board.is_game_over():
-        break
-
+while not board.is_game_over():
     if board.turn == player_side:
         try:
             print(render(board))
@@ -52,6 +50,4 @@ while True:
         except chess.IllegalMoveError:
             print("invalid move; try again")
     else:
-        com_move = next(board.generate_legal_moves())
-        print(com_move)
-        board.push(com_move)
+        board.push(next_move(board))
