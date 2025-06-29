@@ -23,7 +23,7 @@ while True:
                 except chess.IllegalMoveError:
                     print("invalid move; try again")
             else:
-                board.push(next_move(board))
+                board.push(next_move(board, True))
         break
 
     if args[0] == "uci":
