@@ -22,7 +22,7 @@ def run_ui_mode():
             except chess.IllegalMoveError:
                 print("invalid move; try again")
         else:
-            board.push(next_move(board, True))
+            board.push(next_move(board, debug=True))
 
 
 def run_uci_mode():
