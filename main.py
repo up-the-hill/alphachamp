@@ -5,75 +5,84 @@ import ui
 # setup
 board = chess.Board()
 
-# game loop
-while True:
-    args = input().split()
 
-    if args[0] == "ui":
-        # enter terminal interface
-        player_side = (
-            chess.WHITE if input("Play as white or black (w/b)") == "w" else chess.BLACK
-        )
-        # game loop
-        while not board.is_game_over():
-            if board.turn == player_side:
-                try:
-                    print(ui.render(board))
-                    board.push_san(input("Move:"))
-                except chess.IllegalMoveError:
-                    print("invalid move; try again")
-            else:
-                board.push(next_move(board, True))
-        break
+def run_ui_mode():
+    board = chess.Board()
+    player_side = (
+        chess.WHITE if input("Play as white or black (w/b) ") == "w" else chess.BLACK
+    )
 
-    if args[0] == "uci":
-        print("id name alphachamp")
-        print("id author up-the-hill")
-        print("uciok")
-
-    elif args[0] == "isready":
-        print("readyok")
-
-    elif args[0] == "quit":
-        break
-
-    elif args[0] == "position":
-        if args[1] == "startpos":
-            board.reset()
+    while not board.is_game_over():
+        if board.turn == player_side:
+            try:
+                print(ui.render(board))
+                move_san = input("Move: ")
+                board.push_san(move_san)
+            except chess.IllegalMoveError:
+                print("invalid move; try again")
         else:
-            board.set_board_fen(args[-1])
-        if len(args) > 2:
-            if args[2] == "moves":
-                for move in args[3:]:
+            board.push(next_move(board, True))
+
+
+def run_uci_mode():
+    board = chess.Board()
+    print("id name alphachamp")
+    print("id author up-the-hill")
+    print("uciok")
+
+    while True:
+        line = input()
+        if not line:
+            continue
+        args = line.strip().split()
+        cmd = args[0]
+
+        if cmd == "isready":
+            print("readyok")
+
+        elif cmd == "quit":
+            break
+
+        elif cmd == "position":
+            if len(args) < 2:
+                continue
+
+            if args[1] == "startpos":
+                board.reset()
+                move_index = 2
+            elif args[1] == "fen":
+                fen = " ".join(args[2:8])
+                board.set_fen(fen)
+                move_index = 8
+            else:
+                continue
+
+            if len(args) > move_index and args[move_index] == "moves":
+                for move in args[move_index + 1 :]:
                     board.push_uci(move)
 
-    # elif args[:2] == ["position", "startpos"]:
-    #     del hist[1:]
-    #     for ply, move in enumerate(args[3:]):
-    #         i, j, prom = parse(move[:2]), parse(move[2:4]), move[4:].upper()
-    #         if ply % 2 == 1:
-    #             i, j = 119 - i, 119 - j
-    #         hist.append(hist[-1].move(Move(i, j, prom)))
+        elif cmd == "go":
+            print("bestmove ", next_move(board))
 
-    elif args[0] == "go":
-        # wtime, btime, winc, binc = [int(a) / 1000 for a in args[2::2]]
-        # if len(hist) % 2 == 0:
-        #     wtime, winc = btime, binc
-        # think = min(wtime / 40 + winc, wtime / 2 - 1)
-        #
-        # start = time.time()
-        # move_str = None
-        # for depth, gamma, score, move in Searcher().search(hist):
-        #     # The only way we can be sure to have the real move in tp_move,
-        #     # is if we have just failed high.
-        #     if score >= gamma:
-        #         i, j = move.i, move.j
-        #         if len(hist) % 2 == 0:
-        #             i, j = 119 - i, 119 - j
-        #         move_str = render(i) + render(j) + move.prom.lower()
-        #         print("info depth", depth, "score cp", score, "pv", move_str)
-        #     if move_str and time.time() - start > think * 0.8:
-        #         break
-        #
-        # print("bestmove", move_str or "(none)")
-        print("bestmove ", next_move(board))
+
+def main():
+    while True:
+        args = input().strip().split()
+        if not args:
+            continue
+
+        cmd = args[0]
+
+        if cmd == "ui":
+            run_ui_mode()
+            break
+
+        elif cmd == "uci":
+            run_uci_mode()
+            break
+
+        else:
+            print("Unknown command. Please enter 'ui' or 'uci'.")
+
+
+main()
