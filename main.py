@@ -4,6 +4,7 @@ import ui
 
 # setup
 board = chess.Board()
+version = "v0.1"
 
 
 def run_ui_mode():
@@ -66,6 +67,9 @@ def run_uci_mode():
 
 
 def main():
+    print(f"Alphachamp {version}")
+    print('Enter "ui" to enter ui mode (debug)')
+    print('Enter "uci" to enter uci mode')
     while True:
         args = input().strip().split()
         if not args:
