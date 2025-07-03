@@ -1,6 +1,7 @@
 import chess
-from alphachamp import next_move
+from alphachamp import next_move, eval
 import ui
+
 
 # setup
 board = chess.Board()
@@ -8,7 +9,6 @@ version = "v0.1"
 
 
 def run_ui_mode():
-    board = chess.Board()
     player_side = (
         chess.WHITE if input("Play as white or black (w/b) ") == "w" else chess.BLACK
     )
@@ -20,13 +20,14 @@ def run_ui_mode():
                 move_san = input("Move: ")
                 board.push_san(move_san)
             except chess.IllegalMoveError:
-                print("invalid move; try again")
+                print("Illegal move; try again")
+            except chess.InvalidMoveError:
+                print("Invalid move; try again")
         else:
             board.push(next_move(board, debug=True))
 
 
 def run_uci_mode():
-    board = chess.Board()
     print("id name alphachamp")
     print("id author up-the-hill")
     print("uciok")
@@ -70,6 +71,7 @@ def main():
     print(f"Alphachamp {version}")
     print('Enter "ui" to enter ui mode (debug)')
     print('Enter "uci" to enter uci mode')
+    print('Enter "eval <fen>" to evaluate a position.')
     while True:
         args = input().strip().split()
         if not args:
@@ -78,11 +80,19 @@ def main():
         cmd = args[0]
 
         if cmd == "ui":
+            if len(args) > 1:
+                board.set_fen(" ".join(args[1:]))
             run_ui_mode()
             break
 
         elif cmd == "uci":
             run_uci_mode()
+            break
+
+        elif cmd == "eval":
+            board.set_fen(" ".join(args[1:]))
+            print(ui.render(board))
+            print("Eval: ", eval(board))
             break
 
         else:
